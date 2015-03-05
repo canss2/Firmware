@@ -282,5 +282,70 @@ int test_mathlib(int argc, char *argv[])
 
 	}
 
+	{
+		// test quaternion method "rotate" (rotate vector by quaternion)
+		Vector<3> vector = {1.0f,1.0f,1.0f};
+		Vector<3> vector_q;
+		Vector<3> vector_r;
+		Quaternion q;
+		Matrix<3,3> R;
+		float diff = 0.1f;
+		float tol = 0.00001f;
+
+		warnx("Quaternion vector rotation method test.");
+
+		for (float roll = -M_PI_F; roll <= M_PI_F; roll += diff) {
+			for (float pitch = -M_PI_2_F; pitch <= M_PI_2_F; pitch += diff) {
+				for (float yaw = -M_PI_F; yaw <= M_PI_F; yaw += diff) {
+					R.from_euler(roll, pitch, yaw);
+					q.from_euler(roll,pitch,yaw);
+					vector_r = R*vector;
+					vector_q = q.rotate(vector);
+					for (int i = 0; i < 3; i++) {
+						if(fabsf(vector_r(i) - vector_q(i)) > tol) {
+							warnx("Quaternion method 'rotate' outside tolerance");
+						}
+					}
+				}
+			}
+		}
+
+		// test some values calculated with matlab
+		q.from_euler(M_PI_2_F,0.0f,0.0f);
+		vector_q = q.rotate(vector);
+		Vector<3> vector_true = {-1.00f,-1.00f,-1.00f};
+		for(unsigned i = 0;i<3;i++) {
+			if(fabsf(vector_true(i) - vector_q(i)) > tol) {
+				warnx("Quaternion method 'rotate' outside tolerance");
+			}
+		}
+
+		q.from_euler(0.3f,0.2f,0.1f);
+		vector_q = q.rotate(vector);
+		Vector<3> vector_true = {0.8743f,1.2090f,0.8795f};
+		for(unsigned i = 0;i<3;i++) {
+			if(fabsf(vector_true(i) - vector_q(i)) > tol) {
+				warnx("Quaternion method 'rotate' outside tolerance");
+			}
+		}
+
+		q.from_euler(-1.5f,-0.2f,0.5f);
+		vector_q = q.rotate(vector);
+		Vector<3> vector_true = {1.5286f,-0.6805f,0.4474f};
+		for(unsigned i = 0;i<3;i++) {
+			if(fabsf(vector_true(i) - vector_q(i)) > tol) {
+				warnx("Quaternion method 'rotate' outside tolerance");
+			}
+		}
+
+		q.from_euler(M_PI_2_F,-M_PI_2_F,-M_PI_F/3.0f);
+		vector_q = q.rotate(vector);
+		Vector<3> vector_true = {1.00f,0.3660f,-1.3660f};
+		for(unsigned i = 0;i<3;i++) {
+			if(fabsf(vector_true(i) - vector_q(i)) > tol) {
+				warnx("Quaternion method 'rotate' outside tolerance");
+			}
+		}
+	}
 	return rc;
 }
